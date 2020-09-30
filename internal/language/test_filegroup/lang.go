@@ -25,6 +25,7 @@ package test_filegroup
 
 import (
 	"flag"
+	"fmt"
 	"path"
 
 	"github.com/bazelbuild/bazel-gazelle/config"
@@ -62,12 +63,20 @@ func (*testFilegroupLang) Loads() []rule.LoadInfo { return nil }
 func (*testFilegroupLang) Fix(c *config.Config, f *rule.File) {}
 
 func (*testFilegroupLang) Imports(c *config.Config, r *rule.Rule, f *rule.File) []resolve.ImportSpec {
+	fmt.Println("Imports called on", f.Pkg)
+	fmt.Println("\t PrivateAttr was", r.PrivateAttr("_private"))
 	return nil
 }
 
-func (*testFilegroupLang) Embeds(r *rule.Rule, from label.Label) []label.Label { return nil }
+func (*testFilegroupLang) Embeds(r *rule.Rule, from label.Label) []label.Label {
+	fmt.Println("Embeds called on", from)
+	fmt.Println("\t PrivateAttr was", r.PrivateAttr("_private"))
+	return nil
+}
 
 func (*testFilegroupLang) Resolve(c *config.Config, ix *resolve.RuleIndex, rc *repo.RemoteCache, r *rule.Rule, imports interface{}, from label.Label) {
+	fmt.Println("Resolve called on", from)
+	fmt.Println("\t PrivateAttr was", r.PrivateAttr("_private"))
 }
 
 var kinds = map[string]rule.KindInfo{
@@ -89,6 +98,9 @@ func (*testFilegroupLang) GenerateRules(args language.GenerateArgs) language.Gen
 	}
 	r.SetAttr("srcs", srcs)
 	r.SetAttr("testonly", true)
+
+	fmt.Println("Setting PrivateAttr in", args.File.Pkg)
+	r.SetPrivateAttr("_private", "SUCCESS")
 	if args.File == nil || !args.File.HasDefaultVisibility() {
 		r.SetAttr("visibility", []string{"//visibility:public"})
 	}
