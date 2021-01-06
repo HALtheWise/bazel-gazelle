@@ -20,7 +20,7 @@ import (
 	"testing"
 
 	"github.com/bazelbuild/bazel-gazelle/language"
-	"github.com/bazelbuild/bazel-gazelle/language/go"
+	golang "github.com/bazelbuild/bazel-gazelle/language/go"
 	"github.com/bazelbuild/bazel-gazelle/language/proto"
 	"github.com/bazelbuild/bazel-gazelle/merger"
 	"github.com/bazelbuild/bazel-gazelle/rule"
@@ -866,7 +866,22 @@ go_proto_library(
     proto = ":foo_proto",
 )
 `,
-	},
+	}, {
+		desc: "Add nested load",
+		current: `
+go_binary(
+    name = "binary",
+    arg = go_library(),
+)
+`,
+		expected: `
+load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library")
+
+go_binary(
+    name = "binary",
+    arg = go_library(),
+)
+`},
 }
 
 func TestMergeFile(t *testing.T) {
